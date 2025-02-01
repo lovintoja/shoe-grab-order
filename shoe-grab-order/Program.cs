@@ -10,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 //Controllers
 builder.Services.AddControllers();
 
+//Grpc
+builder.Services.AddGrpcAndClients(builder.Configuration);
+
 //Swagger
 builder.Services.SetupSwagger();
 builder.Services.AddEndpointsApiExplorer();

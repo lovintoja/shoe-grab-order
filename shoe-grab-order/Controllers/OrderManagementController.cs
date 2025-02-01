@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ShoeGrabCommonModels;
 using System.Security.Claims;
 using AutoMapper;
+using ShoeGrabOrderManagement.Clients;
 
 namespace ShoeGrabOrderManagement.Controllers;
 
@@ -14,11 +15,13 @@ public class OrderManagementController : ControllerBase
 {
     private readonly OrderContext _context;
     private readonly IMapper _mapper;
+    private readonly IGrpcClient _grpcClient;
 
-    public OrderManagementController(OrderContext context, IMapper mapper)
+    public OrderManagementController(OrderContext context, IMapper mapper, IGrpcClient grpcClient)
     {
         _context = context;
         _mapper = mapper;
+        _grpcClient = grpcClient;
     }
 
     [HttpPost]
@@ -31,7 +34,7 @@ public class OrderManagementController : ControllerBase
 
         foreach (var item in request.Items)
         {
-            Product product = null; //Retrieve product from product service
+            var product = await _grpcClient.GetProduct(item.ProductId);
             if (product == null)
                 return BadRequest($"Product {item.ProductId} not found.");
 
@@ -49,8 +52,8 @@ public class OrderManagementController : ControllerBase
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
-        //send from crm service
-        //await _emailService.SendOrderConfirmationEmailAsync(user.Email, user.Username, order);
+        var user = await _grpcClient.GetUser(userId);
+        await _grpcClient.SendOrderSentNotificationEmail(user.Email);
         var orderDto = _mapper.Map<OrderDto>(order);
         return Ok(orderDto);
     }
@@ -62,7 +65,6 @@ public class OrderManagementController : ControllerBase
     {
         var order = await _context.Orders
             .Include(o => o.Items)
-            .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null)
@@ -157,7 +159,6 @@ public class OrderManagementController : ControllerBase
     public async Task<ActionResult<List<OrderItemExtendedDto>>> GetOrderItems(int id)
     {
         var items = await _context.OrderItems
-            .Include(i => i.Product)
             .Where(i => i.OrderId == id)
             .ToListAsync();
 
@@ -191,7 +192,6 @@ public class OrderManagementController : ControllerBase
         [FromQuery] AdminOrderSearchQuery query)
     {
         var dbQuery = _context.Orders
-            .Include(o => o.User)
             .AsQueryable();
 
         if (query.UserId.HasValue)
@@ -211,7 +211,14 @@ public class OrderManagementController : ControllerBase
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
 
-        var adminOrders = _mapper.Map<List<AdminOrderDto>>(orders);
+        var adminOrders = new List<AdminOrderDto>();
+        foreach (var order in orders)
+        {
+            var adminOrder = _mapper.Map<AdminOrderDto>(order);
+            var user = await _grpcClient.GetUser(order.UserId);
+            adminOrder.UserName = user.Username;
+            adminOrders.Add(adminOrder);
+        }
 
         return Ok(adminOrders);
     }

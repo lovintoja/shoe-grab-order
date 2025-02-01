@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ShoeGrabCommonModels;
 using ShoeGrabCommonModels.Contexts;
+using ShoeGrabOrderManagement.Clients;
 using ShoeGrabOrderManagement.Controllers;
 using ShoeGrabOrderManagement.Dto;
 using System.Security.Claims;
@@ -16,16 +17,19 @@ public class OrderManagementControllerTests : IDisposable
     private readonly Mock<IMapper> _mockMapper;
     private readonly OrderManagementController _controller;
     private readonly UserContextMockHelper _mockHelper;
+    private readonly Mock<IGrpcClient> _mockGrpcClient;
 
     public OrderManagementControllerTests()
     {
         _mockHelper = new UserContextMockHelper();
         _mockContext = _mockHelper.CreateMockContext();
         _mockMapper = new Mock<IMapper>();
+        _mockGrpcClient = new Mock<IGrpcClient>();
 
         _controller = new OrderManagementController(
             _mockContext.Object,
-            _mockMapper.Object
+            _mockMapper.Object,
+            _mockGrpcClient.Object
         );
 
         SetupDefaultMappings();

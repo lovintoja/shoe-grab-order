@@ -9,6 +9,22 @@ namespace ShoeGrabOrderManagement.Extensions;
 
 public static class BuilderExtension
 {
+    public static void AddGrpcAndClients(this IServiceCollection services, IConfiguration configuration)
+    {
+        var grpcSection = configuration.GetSection("GrpcServices");
+        services.AddGrpcClient<UserManagement.UserManagementClient>(options =>
+        {
+            options.Address = new Uri(grpcSection["UserManagementAddress"]);
+        });
+        services.AddGrpcClient<ProductManagement.ProductManagementClient>(options =>
+        {
+            options.Address = new Uri(grpcSection["ProductManagementAddress"]);
+        });
+        services.AddGrpcClient<CrmService.CrmServiceClient>(options =>
+        {
+            options.Address = new Uri(grpcSection["CrmServiceAddress"]);
+        });
+    }
     public static void AddJWTAuthenticationAndAuthorization(this WebApplicationBuilder builder)
     {
         var jwtSettings = builder.Configuration.GetSection("JwtSettings");
