@@ -1,11 +1,10 @@
-﻿using CommonUser = ShoeGrabCommonModels.User;
-using CommonProduct = ShoeGrabCommonModels.Product;
+﻿using ShoeGrabCommonModels;
 
 namespace ShoeGrabOrderManagement.Clients;
 
 public interface IGrpcClient
 {
-    Task<CommonUser> GetUser(int id);
-    Task<CommonProduct> GetProduct(int id);
+    Task<User> GetUser(int id);
+    Task<Product> GetProduct(int id);
     Task<bool> SendOrderSentNotificationEmail(string recepientEmail);
 }

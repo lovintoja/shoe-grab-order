@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
+using ShoeGrabCommonModels;
 using static CrmService;
 using static ProductManagement;
 using static UserManagement;
-using CommonUser = ShoeGrabCommonModels.User;
-using CommonProduct = ShoeGrabCommonModels.Product;
 
 namespace ShoeGrabOrderManagement.Clients;
 
@@ -25,18 +24,18 @@ public class GrpcClient : IGrpcClient
         _mapper = mapper;
     }
 
-    public async Task<CommonProduct> GetProduct(int id)
+    public async Task<Product> GetProduct(int id)
     {
         var request = new GetProductRequest { Id = id };
         var response = await _productManagementClient.GetProductAsync(request).ResponseAsync;
-        return _mapper.Map<CommonProduct>(response.Product);
+        return _mapper.Map<Product>(response.Product);
     }
 
-    public async Task<CommonUser> GetUser(int id)
+    public async Task<User> GetUser(int id)
     {
         var request = new GetUserRequest { Id = id };
         var response = await _userManagementClient.GetUserAsync(request).ResponseAsync;
-        return _mapper.Map<CommonUser>(response.User);
+        return _mapper.Map<User>(response.User);
     }
 
     public async Task<bool> SendOrderSentNotificationEmail(string recepientEmail)
