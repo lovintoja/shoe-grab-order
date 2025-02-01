@@ -10,5 +10,6 @@ public class GrpcMappingProfile : Profile
     {
         CreateMap<ProductProto, Product>();
         CreateMap<UserProto, User>();
+        CreateMap<UserProfileProto, UserProfile>();
     }
 }

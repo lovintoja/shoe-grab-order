@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShoeGrabCommonModels;
+using ShoeGrabOrderManagement.Clients;
 using System.Security.Claims;
 using System.Text;
 
@@ -24,6 +25,7 @@ public static class BuilderExtension
         {
             options.Address = new Uri(grpcSection["CrmServiceAddress"]);
         });
+        services.AddScoped<IGrpcClient, GrpcClient>();
     }
     public static void AddJWTAuthenticationAndAuthorization(this WebApplicationBuilder builder)
     {
