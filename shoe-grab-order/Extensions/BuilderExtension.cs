@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using ShoeGrabCommonModels;
 using ShoeGrabOrderManagement.Clients;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace ShoeGrabOrderManagement.Extensions;
@@ -13,19 +14,25 @@ public static class BuilderExtension
     public static void AddGrpcAndClients(this IServiceCollection services, IConfiguration configuration)
     {
         var grpcSection = configuration.GetSection("GrpcServices");
+        var clientCertificate = new X509Certificate2("Resources\\client.pfx", "test123");
+
         services.AddGrpcClient<UserManagement.UserManagementClient>(options =>
         {
             options.Address = new Uri(grpcSection["UserManagementAddress"]);
-        });
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+
         services.AddGrpcClient<ProductManagement.ProductManagementClient>(options =>
         {
             options.Address = new Uri(grpcSection["ProductManagementAddress"]);
-        });
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+
         services.AddGrpcClient<CrmService.CrmServiceClient>(options =>
         {
             options.Address = new Uri(grpcSection["CrmServiceAddress"]);
-        });
-        services.AddScoped<IGrpcClient, GrpcClient>();
+        })
+        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
     }
     public static void AddJWTAuthenticationAndAuthorization(this WebApplicationBuilder builder)
     {
@@ -93,5 +100,12 @@ public static class BuilderExtension
                 }
             });
         });
+    }
+
+    private static HttpClientHandler ConfigureHandlerUseCertificate(X509Certificate2 clientCertificate)
+    {
+        var handler = new HttpClientHandler();
+        handler.ClientCertificates.Add(clientCertificate);
+        return handler;
     }
 }
