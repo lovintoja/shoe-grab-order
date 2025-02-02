@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ShoeGrabCommonModels.Contexts;
+using ShoeGrabOrderManagement.Clients;
 using ShoeGrabOrderManagement.Controllers;
 using ShoeGrabOrderManagement.Database.Mappers;
 using ShoeGrabOrderManagement.Extensions;
@@ -12,7 +13,7 @@ builder.Services.AddControllers();
 
 //Grpc
 builder.Services.AddGrpcAndClients(builder.Configuration);
-
+builder.Services.AddScoped<IGrpcClient, GrpcClient>();
 //Swagger
 builder.Services.SetupSwagger();
 builder.Services.AddEndpointsApiExplorer();
