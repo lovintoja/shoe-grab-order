@@ -12,8 +12,8 @@ using ShoeGrabCommonModels.Contexts;
 namespace ShoeGrabOrderManagement.Migrations
 {
     [DbContext(typeof(OrderContext))]
-    [Migration("20250201204014_RemoveObsoleteTables")]
-    partial class RemoveObsoleteTables
+    [Migration("20250206223806_SquashForRelease")]
+    partial class SquashForRelease
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,8 +48,8 @@ namespace ShoeGrabOrderManagement.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("numeric");
+                    b.Property<double>("TotalPrice")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -73,11 +73,15 @@ namespace ShoeGrabOrderManagement.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric");
+                    b.Property<double>("UnitPrice")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 

@@ -4,6 +4,7 @@ using ShoeGrabOrderManagement.Clients;
 using ShoeGrabOrderManagement.Controllers;
 using ShoeGrabOrderManagement.Database.Mappers;
 using ShoeGrabOrderManagement.Extensions;
+using ShoeGrabOrderManagement.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddControllers();
 //Grpc
 builder.Services.AddGrpcAndClients(builder.Configuration);
 builder.Services.AddScoped<IGrpcClient, GrpcClient>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 //Swagger
 builder.Services.SetupSwagger();
 builder.Services.AddEndpointsApiExplorer();
