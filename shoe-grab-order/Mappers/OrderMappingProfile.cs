@@ -8,27 +8,18 @@ public class OrderMappingProfile : Profile
 {
     public OrderMappingProfile()
     {
-        CreateMap<Order, OrderDto>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+        CreateMap<Order, OrderDto>();
+        CreateMap<OrderDto, Order>();
 
-        CreateMap<Order, OrderDetailsDto>();
-        CreateMap<Order, OrderSummaryDto>();
-        CreateMap<Order, AdminOrderDto>();
-
-        CreateMap<CreateOrderDto, Order>()
-            .ForMember(dest => dest.Items, opt => opt.Ignore());
-
+        CreateMap<CreateOrderDto, Order>();
         CreateMap<OrderItem, OrderItemDto>();
-
-        CreateMap<OrderItem, OrderItemExtendedDto>()
-            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.Quantity * src.UnitPrice));
-
         CreateMap<OrderItemCreateDto, OrderItem>();
-
-        CreateMap(typeof(PagedResponse<>), typeof(PagedResponse<>));
         CreateMap<OrderItemDto, OrderItem>();
-        CreateMap<OrderDto, Order>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
 
+        CreateMap<PaymentInfoDto, PaymentInfo>();
+        CreateMap<PaymentInfo, PaymentInfoDto>();
+        CreateMap<AddressDto, Address>();
+        CreateMap<Address, AddressDto>();
+        
     }
 }

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using ShoeGrabCommonModels.Contexts;
 using ShoeGrabOrderManagement.Clients;
-using ShoeGrabOrderManagement.Controllers;
 using ShoeGrabOrderManagement.Database.Mappers;
 using ShoeGrabOrderManagement.Extensions;
+using ShoeGrabOrderManagement.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +14,8 @@ builder.Services.AddControllers();
 //Grpc
 builder.Services.AddGrpcAndClients(builder.Configuration);
 builder.Services.AddScoped<IGrpcClient, GrpcClient>();
-//Swagger
-builder.Services.SetupSwagger();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
@@ -28,6 +28,15 @@ builder.Services.AddDbContextPool<OrderContext>(opt =>
 
 //Security
 builder.AddJWTAuthenticationAndAuthorization();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Add AutoMapper with all profiles in the assembly
 builder.Services.AddAutoMapper(typeof(OrderMappingProfile).Assembly);
@@ -41,14 +50,10 @@ app.ApplyMigrations();
 app.UseAuthentication();
 app.UseAuthorization();
 
-//Swagger
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseCors("AllowAllOrigins");
 }
-
-app.UseHttpsRedirection();
 
 app.MapControllers();
 

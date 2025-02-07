@@ -40,7 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" >
+    <Folder Include="Migrations\" />
+    <Folder Include="Resources\">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Folder>
   </ItemGroup>

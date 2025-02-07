@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShoeGrabCommonModels;
-using ShoeGrabOrderManagement.Clients;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -14,25 +13,33 @@ public static class BuilderExtension
     public static void AddGrpcAndClients(this IServiceCollection services, IConfiguration configuration)
     {
         var grpcSection = configuration.GetSection("GrpcServices");
-        var clientCertificate = new X509Certificate2("Resources\\client.pfx", "test123");
 
-        services.AddGrpcClient<UserManagement.UserManagementClient>(options =>
+        var userService = services.AddGrpcClient<UserManagement.UserManagementClient>(options =>
         {
             options.Address = new Uri(grpcSection["UserManagementAddress"]);
-        })
-        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+        });
 
-        services.AddGrpcClient<ProductManagement.ProductManagementClient>(options =>
+        var productService = services.AddGrpcClient<ProductManagement.ProductManagementClient>(options =>
         {
             options.Address = new Uri(grpcSection["ProductManagementAddress"]);
-        })
-        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+        });
 
-        services.AddGrpcClient<CrmService.CrmServiceClient>(options =>
+        var crmService = services.AddGrpcClient<CrmService.CrmServiceClient>(options =>
         {
             options.Address = new Uri(grpcSection["CrmServiceAddress"]);
-        })
-        .ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+        });
+
+        var certificatePath = grpcSection["Certificate:Path"];
+        var certificatePassword = grpcSection["Certificate:Password"];
+
+        if (certificatePath != null && certificatePassword != null)
+        {
+            var clientCertificate = new X509Certificate2("Resources\\client.pfx", "test123");
+
+            crmService.ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+            productService.ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+            userService.ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
+        }
     }
     public static void AddJWTAuthenticationAndAuthorization(this WebApplicationBuilder builder)
     {
