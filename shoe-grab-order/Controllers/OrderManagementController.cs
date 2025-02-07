@@ -45,15 +45,15 @@ public class OrderManagementController : ControllerBase
         return Ok();
     }
 
-    [HttpPut]
-    [Route("status")]
-    public async Task<IActionResult> ChangeOrderStatus(ChangeOrderStatusDto request)
+    [HttpPatch]
+    [Route("{orderId}/status")]
+    public async Task<IActionResult> ChangeOrderStatus(int orderId, [FromBody] OrderStatusUpdateDto request)
     {
-        var order = await _context.Orders.FindAsync(request.OrderId);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order == null)
             return NotFound();
 
-        if (!Enum.TryParse(typeof(OrderStatus), request.OrderStatus, out var status))
+        if (!Enum.TryParse(typeof(OrderStatus), request.NewStatus, out var status))
             return BadRequest("Wrong status format.");
         var mappedStatus = (OrderStatus)status;
         order.Status = mappedStatus;

@@ -10,7 +10,6 @@ using System.Security.Claims;
 namespace ShoeGrabOrderManagement.Controllers;
 
 [Route("api/order")]
-[Authorize]
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -25,7 +24,8 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CreateOrderDto request)
+    [Authorize]
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto request)
     {
         var userId = GetUserId();
 
@@ -34,13 +34,13 @@ public class OrderController : ControllerBase
 
         var order = _mapper.Map<Order>(request);
 
-        var addedOrder = await _orderService.CreateOrder(userId.Value, order);
+        var success = await _orderService.CreateOrder(userId.Value, order);
         
-        var response = _mapper.Map<OrderDto>(addedOrder);
-        return Ok(response);
+        return Ok(new { Success = success });
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders()
     {
         var userId = GetUserId();

@@ -17,7 +17,7 @@ public class OrderService : IOrderService
         _grpcClient = grpcClient;
     }
 
-    public async Task<Order?> CreateOrder(int userId, Order order)
+    public async Task<bool> CreateOrder(int userId, Order order)
     {
         foreach (var item in order.Items)
         {
@@ -31,13 +31,27 @@ public class OrderService : IOrderService
 
         order.TotalPrice = order.Items.Sum(i => i.Quantity * i.UnitPrice);
         order.UserId = userId;
+        try
+        {
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
 
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
-
-        var user = await _grpcClient.GetUser(userId);
-        await _grpcClient.SendOrderSentNotificationEmail(user.Email);
-        return order;
+        try
+        {
+            var user = await _grpcClient.GetUser(userId);
+            await _grpcClient.SendOrderSentNotificationEmail(user.Email);
+        }
+        catch (Exception)
+        {
+            //If email does not get sent, order still went through.
+            return true;
+        }
+        return true;
     }
 
     public async Task<IEnumerable<Order>> GetOrders(int userId)
