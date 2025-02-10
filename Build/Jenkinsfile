@@ -1,15 +1,11 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/dotnet/sdk:8.0'
-            args '-u root'
-        }
-    }
+    agent any
     environment {
         DOTNET_CLI_TELEMETRY_OPTOUT = '1'
         DOTNET_NOLOGO = '1'
         DOCKER_REPO = 'fiflakToJa/shoe-grab:order'
         DOCKER_REGISTRY_CREDENTIALS = 'DOCKER_HUB_CREDENTIALS'
+		DOTNET_CLI_HOME = '/.dotnet'
     }
     stages {
         stage('Restore and Build') {
@@ -20,7 +16,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_REPO .'
+                sh 'docker build -f ./Build/Dockerfile -t $DOCKER_REPO .'
             }
         }
         stage('Push Docker Image') {
