@@ -1,8 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 COPY ./../shoe-grab-order/*.csproj ./shoe-grab-order/
-RUN dotnet restore ./shoe-grab-order/*.csproj
+COPY ./../shoe-grab-common/ ./shoe-grab-common/
 COPY ./../shoe-grab-order/ ./shoe-grab-order/
+
+RUN dotnet restore ./shoe-grab-order/*.csproj
 RUN dotnet publish ./shoe-grab-order/*.csproj -c Release -o /out
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
