@@ -116,6 +116,10 @@ public static class BuilderExtension
 
     public static void SetupKestrel(this WebApplicationBuilder builder)
     {
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Configure();
+        });
         builder.WebHost.ConfigureKestrel((context, options) =>
         {
             var kestrelSection = context.Configuration.GetSection("Kestrel:Endpoints");
@@ -124,7 +128,7 @@ public static class BuilderExtension
             if (grpcEndpoint.Exists())
             {
                 var grpcUrl = new Uri(grpcEndpoint["Url"]);
-                options.Listen(IPAddress.Any, grpcUrl.Port, listenOptions =>
+                options.Listen(IPAddress.Parse(grpcUrl.Host), grpcUrl.Port, listenOptions =>
                 {
                     listenOptions.Protocols = Enum.Parse<HttpProtocols>(grpcEndpoint["Protocols"]);
                     listenOptions.UseHttps(httpsOptions =>
@@ -147,7 +151,7 @@ public static class BuilderExtension
             if (restApiEndpoint.Exists())
             {
                 var restApiUrl = new Uri(restApiEndpoint["Url"]);
-                options.Listen(IPAddress.Any, restApiUrl.Port, listenOptions =>
+                options.Listen(IPAddress.Parse(restApiUrl.Host), restApiUrl.Port, listenOptions =>
                 {
                     listenOptions.Protocols = Enum.Parse<HttpProtocols>(restApiEndpoint["Protocols"]);
                 });
