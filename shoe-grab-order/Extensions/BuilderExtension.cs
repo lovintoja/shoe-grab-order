@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShoeGrabCommonModels;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -28,6 +31,8 @@ public static class BuilderExtension
         {
             options.Address = new Uri(grpcSection["CrmServiceAddress"]);
         });
+
+        services.AddGrpc();
 
         var certificatePath = grpcSection["Certificate:Path"];
         var certificatePassword = grpcSection["Certificate:Password"];
@@ -106,6 +111,47 @@ public static class BuilderExtension
                     new string[] {}
                 }
             });
+        });
+    }
+
+    public static void SetupKestrel(this WebApplicationBuilder builder)
+    {
+        builder.WebHost.ConfigureKestrel((context, options) =>
+        {
+            var kestrelSection = context.Configuration.GetSection("Kestrel:Endpoints");
+
+            var grpcEndpoint = kestrelSection.GetSection("Grpc");
+            if (grpcEndpoint.Exists())
+            {
+                var grpcUrl = new Uri(grpcEndpoint["Url"]);
+                options.Listen(IPAddress.Any, grpcUrl.Port, listenOptions =>
+                {
+                    listenOptions.Protocols = Enum.Parse<HttpProtocols>(grpcEndpoint["Protocols"]);
+                    listenOptions.UseHttps(httpsOptions =>
+                    {
+                        var certificatePath = grpcEndpoint["Certificate:Path"];
+                        var certificatePassword = grpcEndpoint["Certificate:Password"];
+                        var parseSuccess = Enum.TryParse(grpcEndpoint["Certificate:ClientCertificateMode"], out ClientCertificateMode clientCertificateMode);
+
+                        if (certificatePath != null && certificatePassword != null && parseSuccess)
+                        {
+                            var certificate = new X509Certificate2(certificatePath, certificatePassword);
+                            httpsOptions.ServerCertificate = certificate;
+                            httpsOptions.ClientCertificateMode = clientCertificateMode;
+                        }
+                    });
+                });
+            }
+
+            var restApiEndpoint = kestrelSection.GetSection("RestApi");
+            if (restApiEndpoint.Exists())
+            {
+                var restApiUrl = new Uri(restApiEndpoint["Url"]);
+                options.Listen(IPAddress.Any, restApiUrl.Port, listenOptions =>
+                {
+                    listenOptions.Protocols = Enum.Parse<HttpProtocols>(restApiEndpoint["Protocols"]);
+                });
+            }
         });
     }
 
