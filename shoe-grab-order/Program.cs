@@ -3,6 +3,7 @@ using ShoeGrabCommonModels.Contexts;
 using ShoeGrabOrderManagement.Clients;
 using ShoeGrabOrderManagement.Database.Mappers;
 using ShoeGrabOrderManagement.Extensions;
+using ShoeGrabOrderManagement.GrpcServices;
 using ShoeGrabOrderManagement.Services;
 
 
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 //Controllers
 builder.Services.AddControllers();
 
+builder.SetupKestrel();
 //Grpc
 builder.Services.AddGrpcAndClients(builder.Configuration);
 builder.Services.AddScoped<IGrpcClient, GrpcClient>();
@@ -46,6 +48,8 @@ var app = builder.Build();
 //Migrations
 app.ApplyMigrations();
 
+
+app.MapGrpcService<OrderManagementService>();
 //Security
 app.UseAuthentication();
 app.UseAuthorization();

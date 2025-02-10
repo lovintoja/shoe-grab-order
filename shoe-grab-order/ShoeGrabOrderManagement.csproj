@@ -46,4 +46,13 @@
 	</Folder>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\client.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\server.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
