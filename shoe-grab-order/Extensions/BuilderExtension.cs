@@ -39,7 +39,7 @@ public static class BuilderExtension
 
         if (certificatePath != null && certificatePassword != null)
         {
-            var clientCertificate = new X509Certificate2("Resources\\client.pfx", "test123");
+            var clientCertificate = new X509Certificate2(certificatePath, certificatePassword);
 
             crmService.ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
             productService.ConfigurePrimaryHttpMessageHandler(() => ConfigureHandlerUseCertificate(clientCertificate));
