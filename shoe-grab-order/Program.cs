@@ -65,10 +65,7 @@ app.MapGrpcService<OrderManagementService>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowAllOrigins");
-}
+app.UseCors("AllowAllOrigins");
 
 app.MapControllers();
 
