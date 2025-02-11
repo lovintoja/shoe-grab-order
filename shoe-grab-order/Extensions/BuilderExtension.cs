@@ -19,17 +19,17 @@ public static class BuilderExtension
 
         var userService = services.AddGrpcClient<UserManagement.UserManagementClient>(options =>
         {
-            options.Address = new Uri(grpcSection["UserManagementAddress"]);
+            options.Address = new Uri(Environment.GetEnvironmentVariable("USER_MANAGEMENT_CONNECTION_STRING"));
         });
 
         var productService = services.AddGrpcClient<ProductManagement.ProductManagementClient>(options =>
         {
-            options.Address = new Uri(grpcSection["ProductManagementAddress"]);
+            options.Address = new Uri(Environment.GetEnvironmentVariable("PRODUCT_MANAGEMENT_CONNECTION_STRING"));
         });
 
         var crmService = services.AddGrpcClient<CrmService.CrmServiceClient>(options =>
         {
-            options.Address = new Uri(grpcSection["CrmServiceAddress"]);
+            options.Address = new Uri(Environment.GetEnvironmentVariable("CRM_CONNECTION_STRING"));
         });
 
         services.AddGrpc();
