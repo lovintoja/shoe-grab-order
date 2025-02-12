@@ -12,6 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 //Controllers
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.SetupKestrel();
 //Grpc
 builder.Services.AddGrpcAndClients(builder.Configuration);
@@ -41,15 +51,7 @@ else
 
 //Security
 builder.AddJWTAuthenticationAndAuthorization();
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
+
 
 // Add AutoMapper with all profiles in the assembly
 builder.Services.AddAutoMapper(typeof(OrderMappingProfile).Assembly);
@@ -62,10 +64,11 @@ app.ApplyMigrations();
 
 app.MapGrpcService<OrderManagementService>();
 //Security
+app.UseCors("AllowAllOrigins");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowAllOrigins");
 
 app.MapControllers();
 
