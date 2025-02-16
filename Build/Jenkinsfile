@@ -14,6 +14,11 @@ pipeline {
                 sh 'dotnet build --configuration Release'
             }
         }
+		stage('Execute Tests') {
+			steps {
+				sh 'dotnet test'
+			}
+		}
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -f ./Build/Dockerfile -t $DOCKER_REPO .'
